@@ -98,11 +98,6 @@ static void *binfile_new(t_symbol *s, int argc, t_atom *argv)
     t_symbol    *pathSymbol;
     int         i;
 
-    if (x == NULL)
-    {
-        error("binfile: Could not create...");
-        return x;
-    }
     x->x_fP = NULL;
     x->x_fPath[0] = '\0';
     x->x_our_directory = canvas_getcurrentdir();/* get the current directory to use as the base for relative file paths */
@@ -128,7 +123,7 @@ static void *binfile_new(t_symbol *s, int argc, t_atom *argv)
         }
     }
     if ((x->x_buf = getbytes(x->x_buf_length)) == NULL)
-        error ("binfile: Unable to allocate %lu bytes for buffer", x->x_buf_length);
+        pd_error (x, "binfile: Unable to allocate %lu bytes for buffer", x->x_buf_length);
     x->x_bin_outlet = outlet_new(&x->x_obj, gensym("float"));
     x->x_info_outlet = outlet_new(&x->x_obj, gensym("list"));
     x->x_bang_outlet = outlet_new(&x->x_obj, gensym("bang")); /* bang at end of file */
@@ -186,7 +181,7 @@ static void binfile_write(t_binfile *x, t_symbol *path)
     size_t bytes_written = 0L;
 
     if (0==(x->x_fP = binfile_open_path(x, path->s_name, "wb")))
-        error("binfile: Unable to open %s for writing", path->s_name);
+        pd_error(x, "binfile: Unable to open %s for writing", path->s_name);
     bytes_written = fwrite(x->x_buf, 1L, x->x_length, x->x_fP);
     if (bytes_written != x->x_length) post("binfile: %ld bytes written != %ld", bytes_written, x->x_length);
     else post("binfile: wrote %ld bytes to %s", bytes_written, path->s_name);
@@ -203,7 +198,7 @@ static void binfile_read(t_binfile *x, t_symbol *path, t_float max_bytes)
 
     if (0==(x->x_fP = binfile_open_path(x, path->s_name, "rb")))
     {
-        error("binfile: Unable to open %s for reading", path->s_name);
+        pd_error(x, "binfile: Unable to open %s for reading", path->s_name);
         return;
     }
     /* get length of file up to max_bytes */
@@ -217,7 +212,7 @@ static void binfile_read(t_binfile *x, t_symbol *path, t_float max_bytes)
     if (NULL == x->x_buf)
     {
         x->x_buf_length = 0L;
-        error ("binfile: unable to allocate %ld bytes for %s", file_length, path->s_name);
+        pd_error (x, "binfile: unable to allocate %ld bytes for %s", file_length, path->s_name);
         return;
     }
     x->x_rd_offset = 0L;
@@ -231,7 +226,7 @@ static void binfile_read(t_binfile *x, t_symbol *path, t_float max_bytes)
     sys_fclose (x->x_fP);
     x->x_fP = NULL;
     if (bytes_read != file_length) post("binfile length %ld not equal to bytes read (%ld)", file_length, bytes_read);
-    else post("binfle: read %ld bytes from %s", bytes_read, path->s_name);
+    else post("binfile: read %ld bytes from %s", bytes_read, path->s_name);
 }
 
 static void binfile_bang(t_binfile *x)
@@ -267,12 +262,12 @@ static void binfile_add(t_binfile *x, t_symbol *s, int argc, t_atom *argv)
             f = atom_getfloat(&argv[i]);
             if (j < -128 || j > 255)
             {
-                error("binfile: input (%d) out of range [0..255]", j);
+                pd_error(x, "binfile: input (%d) out of range [0..255]", j);
                 return;
             }
             if (j != f)
             {
-                error("binfile: input (%f) not an integer", f);
+                pd_error(x, "binfile: input (%f) not an integer", f);
                 return;
             }
             if (x->x_buf_length <= x->x_wr_offset)
@@ -280,7 +275,7 @@ static void binfile_add(t_binfile *x, t_symbol *s, int argc, t_atom *argv)
                 x->x_buf = resizebytes(x->x_buf, x->x_buf_length, x->x_buf_length+ALLOC_BLOCK_SIZE);
                 if (x->x_buf == NULL)
                 {
-                    error("binfile: unable to resize buffer");
+                    pd_error(x, "binfile: unable to resize buffer");
                     return;
                 }
                 x->x_buf_length += ALLOC_BLOCK_SIZE;
@@ -290,7 +285,7 @@ static void binfile_add(t_binfile *x, t_symbol *s, int argc, t_atom *argv)
         }
         else
         {
-            error("binfile: input %d not a float", i);
+            pd_error(x, "binfile: input %d not a float", i);
             return;
         }
     }
