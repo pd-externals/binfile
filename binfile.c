@@ -97,6 +97,7 @@ static void *binfile_new(t_symbol *s, int argc, t_atom *argv)
     t_binfile  *x = (t_binfile *)pd_new(binfile_class);
     t_symbol    *pathSymbol;
     int         i;
+    (void)s;
 
     x->x_fP = NULL;
     x->x_fPath[0] = '\0';
@@ -253,6 +254,7 @@ static void binfile_add(t_binfile *x, t_symbol *s, int argc, t_atom *argv)
 {
     int         i, j;
     float       f;
+    (void)s;
 
     for (i = 0; i < argc; ++i)
     {
