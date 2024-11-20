@@ -55,7 +55,7 @@ typedef struct t_binfile
 
 static void binfile_rewind (t_binfile *x);
 static void binfile_free(t_binfile *x);
-static FILE *binfile_open_path(t_binfile *x, char *path, char *mode);
+static FILE *binfile_open_path(t_binfile *x, const char *path, const char *mode);
 static void binfile_read(t_binfile *x, t_symbol *path, t_float max_bytes);
 static void binfile_write(t_binfile *x, t_symbol *path);
 static void binfile_bang(t_binfile *x);
@@ -138,7 +138,7 @@ static void binfile_free(t_binfile *x)
     x->x_buf_length = 0L;
 }
 
-static FILE *binfile_open_path(t_binfile *x, char *path, char *mode)
+static FILE *binfile_open_path(t_binfile *x, const char *path, const char *mode)
 /* path is a string. Up to PATH_BUF_SIZE-1 characters will be copied into x->x_fPath. */
 /* mode should be "rb" or "wb" */
 /* x->x_fPath will be used as a file name to open. */
